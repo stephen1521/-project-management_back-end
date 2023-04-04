@@ -24,13 +24,13 @@ async function registration (req, res) {
     	const email = req.body.email;
         const createdAt = Date.now;
         const lastModifiedAt = Date.now;
-    	let password = req.body.password;
+    	const password = req.body.password;
     	const saltRounds = 5; // In a real application, this number would be somewhere between 5 and 10
-    	password = await generatePasswordHash(password, saltRounds);
+    	const hashPassword = await generatePasswordHash(password, saltRounds);
 		const newUser = new User ({
             name,
             email,
-            password,
+            hashPassword,
             createdAt,
             lastModifiedAt
         })
@@ -81,13 +81,13 @@ async function updateUser (req, res) {
     try {
         const name = req.body.name;
 		const email = req.body.email;
-    	let password = req.body.password;
+    	const password = req.body.password;
     	const saltRounds = 5; // In a real application, this number would be somewhere between 5 and 10
-    	password = await generatePasswordHash(password, saltRounds);
+    	const hashPassword = await generatePasswordHash(password, saltRounds);
 		const userUpdated = {
             name: name,
 			email: email,
-			password: password,
+			password: hashPassword,
             lastModifiedAt: Date.now
 		}
         await User.findOneAndUpdate({email:entryEmail}, userUpdated);
