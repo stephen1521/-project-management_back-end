@@ -20,19 +20,17 @@ async function getAllUsers (req, res) {
 // Register Users into db 
 async function registration (req, res) {
   	try {
-        const name = req.body.name;
     	const email = req.body.email;
-        const createdAt = Date.now;
-        const lastModifiedAt = Date.now;
-    	const password = req.body.password;
+    	const nonHashPassword = req.body.password;
+		const createdAt = Date.now();
+		const lastModifiedAt = Date.now();
     	const saltRounds = 5; // In a real application, this number would be somewhere between 5 and 10
-    	const hashPassword = await generatePasswordHash(password, saltRounds);
+    	const password = await generatePasswordHash(nonHashPassword, saltRounds);
 		const newUser = new User ({
-            name,
             email,
-            hashPassword,
-            createdAt,
-            lastModifiedAt
+            password,
+			createdAt,
+			lastModifiedAt
         })
         await newUser.save();
     	res.json({ success: true });
