@@ -20,6 +20,7 @@ async function getAllUsers (req, res) {
 // Register Users into db 
 async function registration (req, res) {
   	try {
+		const name = req.body.name;
     	const email = req.body.email;
     	const nonHashPassword = req.body.password;
 		const createdAt = Date.now();
@@ -27,6 +28,7 @@ async function registration (req, res) {
     	const saltRounds = 5; // In a real application, this number would be somewhere between 5 and 10
     	const password = await generatePasswordHash(nonHashPassword, saltRounds);
 		const newUser = new User ({
+			name,
             email,
             password,
 			createdAt,
