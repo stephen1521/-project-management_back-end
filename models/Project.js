@@ -9,7 +9,8 @@ const TaskSchema = new mongoose.Schema({
     dueDate: { type: Date, defualt: Date.now, required: true},
     _id: {type: String, default: uuid4},
     description: {type: String, required: true},
-    assignedUsers: {type: [String], required: true}
+    assignedUsers: {type: [String], required: true},
+    status: {type: String, default: 'not-started'}
 })
  
 const ProjectSchema = new mongoose.Schema({

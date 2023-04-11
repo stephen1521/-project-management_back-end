@@ -28,6 +28,18 @@ async function getUserProjects (req, res) {
     }
 }
 
+async function getAllTasks (req, res) {
+    try {
+        const entryId = req.params.id;
+        const project = await Project.findById(entryId);
+        const tasks = project.task;
+        res.json({success: true, tasks: tasks});
+    } catch (e) {
+        console.error(e);
+    	res.json({ success: false, message: e.toString() });
+    }
+}
+
 async function createProject (req, res) {
     try {
         const userId = req.params.id;
@@ -189,4 +201,5 @@ module.exports = {
     updateProject,
     updateTask,
     getUserProjects,
+    getAllTasks
 };
