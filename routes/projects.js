@@ -7,6 +7,7 @@ router.post('/createProject/:id', projectController.createProject);
 router.post('/createTask/:projectId/:userId', projectController.createTask);
 router.post('/updateProject/:id', projectController.updateProject);
 router.post('/updateTask/:projectId/:taskId', projectController.updateTask);
+router.get('/userProjects/:id', projectController.getUserProjects);
 
 
 module.exports = router;

@@ -5,11 +5,28 @@ const { v4: uuid4 } = require("uuid");
 async function getAllProjects (req, res) {
     try {
         const allProjects = await Project.find({});
-        res.json({projects: allProjects });
+        res.json({succes:true, projects: allProjects });
     } catch(e) {
-        console.log(e);
+        console.error(e);
+    	res.json({ success: false, message: e.toString() });
     }
 };
+
+async function getUserProjects (req, res) {
+    try {
+        const entryId = req.params.id;
+        const user = await User.findById(entryId);
+        const userProjects = [];
+        for(const id of user.projects){
+            const project = await Project.findById(id);
+            userProjects.push(project);
+        }
+        res.json({success:true, userProjects: userProjects});
+    } catch (e) {
+        console.error(e);
+    	res.json({ success: false, message: e.toString() });
+    }
+}
 
 async function createProject (req, res) {
     try {
@@ -21,12 +38,16 @@ async function createProject (req, res) {
         const dueDate = req.body.dueDate;
         const description = req.body.description;
         const assignedUsers = [];
+        assignedUsers.push(userId);
         const _id = uuid4();
         if(req.body.assignedUsers !== undefined){
-            for(const id of req.body.assignedUsers){
-                assignedUsers.push(id);
-                const user = await User.findById(userId);
-                user.projects.push(_id);
+            const usersToBeAdded = req.body.assignedUsers.split(', ');
+            for(const name of usersToBeAdded){
+                const user = await User.find({name});
+                assignedUsers.push(user[0]._id);
+                user[0].projects.push(_id);
+                user[0].lastModifiedAt = Date.now();
+                await user[0].save();
             }
         }
         const newProject = new Project ({
@@ -63,13 +84,14 @@ async function createTask (req, res) {
         const description = req.body.description;
         const assignedUsers = [];
         const _id = uuid4();
-        for(const id of req.body.assignedUsers){
-            assignedUsers.push(id);
-            const user = await User.findById(id)
-            user.tasks.push(_id);
-            user.lastModifiedAt = Date.now();
-            await user.save();
-        }
+        const usersToBeAdded = req.body.assignedUsers.split(', ');
+        for(const name of usersToBeAdded){
+            const user = await User.find({name});
+            assignedUsers.push(user[0]._id);
+            user[0].tasks.push(_id);
+            user[0].lastModifiedAt = Date.now();
+            await user[0].save();
+            }
         const newTask = {
             taskName: taskName,
             createdBy: createdBy,
@@ -166,4 +188,5 @@ module.exports = {
     createTask,
     updateProject,
     updateTask,
+    getUserProjects,
 };

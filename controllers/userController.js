@@ -17,6 +17,16 @@ async function getAllUsers (req, res) {
       }
 };
 
+async function getUser (req, res) {
+	try {
+		const userId = req.params.id;
+		const user = await User.findById(userId);
+		res.json({success:true, user:user});
+	} catch (e) {
+		onsole.log(e);
+	}
+}
+
 // Register Users into db 
 async function registration (req, res) {
   	try {
@@ -104,5 +114,6 @@ module.exports = {
     registration,
     login,
     getAllUsers,
-	updateUser
+	updateUser,
+	getUser
 };

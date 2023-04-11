@@ -9,14 +9,14 @@ const TaskSchema = new mongoose.Schema({
     dueDate: { type: Date, defualt: Date.now, required: true},
     _id: {type: String, default: uuid4},
     description: {type: String, required: true},
-    assignedUsers: {type: Array, required: true}
+    assignedUsers: {type: [String], required: true}
 })
  
 const ProjectSchema = new mongoose.Schema({
     projectName: { type: String, required: true},
     task: [ TaskSchema ],
     createdBy: { type: String, required: true},
-    assignedUsers: { type: Array},
+    assignedUsers: { type: [String]},
     _id: {type: String, default: uuid4},
     createdAt: { type: Date, defualt: Date.now, required: true},
     lastModifiedAt: { type: Date, defualt: Date.now, required: true},
