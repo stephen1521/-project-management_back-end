@@ -103,7 +103,7 @@ async function createTask (req, res) {
             user[0].tasks.push(_id);
             user[0].lastModifiedAt = Date.now();
             await user[0].save();
-            }
+        }
         const newTask = {
             taskName: taskName,
             createdBy: createdBy,
@@ -164,7 +164,7 @@ async function updateTask (req, res) {
     try {
         const entryId = req.params.projectId;
         const project = await Project.findById(entryId);
-        const task = project.task.id(req.params.taskId);
+        const task = await project.task.id(req.params.taskId);
         if(req.body.taskName !== undefined){
             task.taskName = req.body.taskName;
         }
@@ -174,15 +174,28 @@ async function updateTask (req, res) {
         if(req.body.description !== undefined){
             task.description = req.body.description;
         }
-        if(req.body.assignedUsers !== undefined){
-            for(const id of req.body.assignedUsers){
-                task.assignedUsers.push(id);
-                const user = await User.findById(id)
-                user.tasks.push(req.params.taskId);
-                user.lastModifiedAt = Date.now();
-                await user.save();
+        for(const id of task.assignedUsers){
+            const user = await User.findById(id);
+            for(const taskId of user.tasks){
+                if(task._id === taskId){
+                    const index = user.tasks.indexOf(taskId);
+                    user.tasks.splice(index, 1);
+                    await user.save();
+                }
             }
         }
+        task.assignedUsers = [];
+        if(req.body.assignedUsers){
+            const usersToBeAdded = req.body.assignedUsers.split(', ');
+            for(const name of usersToBeAdded){
+                const user = await User.find({name});    
+                user[0].tasks.push(task._id);
+                user[0].lastModifiedAt = Date.now();
+                task.assignedUsers.push(user[0]._id);
+                await user[0].save();
+            }
+        }
+        task.status = req.body.status;
         task.lastModifiedAt = Date.now();
         task.save();
         project.save();
@@ -193,6 +206,30 @@ async function updateTask (req, res) {
     }
 }
 
+async function deleteTask (req, res) {
+    try {
+        const projectId = req.params.projectId;
+        const taskId = req.params.taskId;
+        const project = await Project.findById(projectId);
+        const task = project.task.id(taskId);
+        for(const id of task.assignedUsers){
+            const user = await User.findById(id);
+            for(const task of user.tasks){
+                if(task === taskId){
+                    const index = user.tasks.indexOf(taskId);
+                    user.tasks.splice(index, 1);
+                    await user.save();
+                }
+            }
+        }
+        await project.task.pull(taskId);
+        await project.save();
+        res.json({success:true});
+    } catch (e) {
+        console.error(e);
+    	res.json({ success: false, message: e.toString() });
+    }
+}
 
 module.exports = {
     getAllProjects,
@@ -201,5 +238,6 @@ module.exports = {
     updateProject,
     updateTask,
     getUserProjects,
-    getAllTasks
+    getAllTasks,
+    deleteTask
 };
